@@ -24,8 +24,6 @@ const uLong targetCrc = 0xfb610011;
 const unsigned char targetShaHex[] = "35bfe051be8b10feb2c92f4daed7d2f2e387bb68";
 
 int main() {
-  const uLong initCrc = crc32(0, Z_NULL, 0);
-  
   unsigned char targetSha[SHA_DIGEST_LENGTH];
   assert(sizeof(targetShaHex) == 2 * SHA_DIGEST_LENGTH + 1);
   for (int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
@@ -61,6 +59,11 @@ int main() {
       struct timespec startTime;
       clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
 
+      uLong partialCrc[len + 1];
+      partialCrc[0] = crc32(0, Z_NULL, 0);
+      for (int i = 1; i <= len; ++i) {
+        partialCrc[i] = crc32(partialCrc[i - 1], str + i - 1, 1);
+      }
       while (1) {
         ++num;
         if (num == reportEach) {
@@ -73,8 +76,7 @@ int main() {
           startTime = stopTime;
         }
 
-        uLong crc = crc32(initCrc, str, len);
-        if (crc == targetCrc) {
+        if (partialCrc[len] == targetCrc) {
           printf("possible result (hex): ");
           for (int i = 0; i < len; i++) {
             printf("%02hhx ", str[i]);
@@ -95,11 +97,14 @@ int main() {
         }
         
         int all = 1;
-        for (int i = 0; i < len - 1; ++i) {
+        for (int i = len - 1; i >= 0; --i) {
           if (code[i] != tableLen - 1) {
             ++code[i];
-            all = 0;
             str[i + 1] = table[code[i]];
+            for (int j = i + 1; j <= len; ++j) {
+              partialCrc[j] = crc32(partialCrc[j - 1], str + j - 1, 1);
+            }
+            all = 0;
             break;
           } else {
             code[i] = 0;
