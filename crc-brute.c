@@ -17,7 +17,7 @@ utf8 encoding
 const int from = 29;
 const int to = 29;
 // see UTF-8 and ASCII character tables for explanation
-const char range[] = "\x21\x2f" "\x3a\x40" "\x5b\x60" "\x7b\x7e" "\xd0\xd1" "\x90\xbf" "\x80\x0f";
+const char range[] = "\x20\x2f" "\x3a\x40" "\x5b\x60" "\x7b\x7e" "\xd0\xd1" "\x90\xbf" "\x80\x0f";
 const long long unsigned int reportEach = 1000000000;
 
 const uLong targetCrc = 0xfb610011;
