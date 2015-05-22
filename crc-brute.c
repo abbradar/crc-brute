@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include <zlib.h>
 #include <openssl/sha.h>
@@ -39,7 +40,7 @@ int main() {
       assert(++tableLen <= 256);
     }
   }
-  
+
   for (int len = from; len <= to; ++len) {
     printf("length: %i (trying from %i to %i)\n", len, from, to);
     #pragma omp parallel for
@@ -57,12 +58,19 @@ int main() {
       str[len] = '\0';
 
       long long unsigned int num = 0;
+      struct timespec startTime;
+      clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
 
       while (1) {
         ++num;
         if (num == reportEach) {
-          printf("done %i hashes\n", num);
+          struct timespec stopTime;
+          clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stopTime);
+          double time = (double)(stopTime.tv_sec - startTime.tv_sec) * 1000
+            + (double)(stopTime.tv_nsec - startTime.tv_nsec) / 1000000;
+          printf("done %u hashes in %f ms\n", reportEach, time);
           num = 0;
+          startTime = stopTime;
         }
 
         uLong crc = crc32(initCrc, str, len);
