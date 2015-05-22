@@ -53,6 +53,9 @@ int main() {
       memset(code, 0, sizeof(code));
       char str[len + 1];
       str[0] = table[start];
+      for (int i = 1; i < len; ++i) {
+        str[i] = table[0];
+      }
       str[len] = '\0';
 
       long long unsigned int num = 0;
@@ -62,10 +65,6 @@ int main() {
         if (num == reportEach) {
           printf("done %i hashes\n", num);
           num = 0;
-        }
-
-        for (int i = 1; i < len; ++i) {
-          str[i] = table[code[i - 1]];
         }
 
         uLong crc = crc32(initCrc, str, len);
@@ -88,13 +87,14 @@ int main() {
           if (code[i] != tableLen - 1) {
             ++code[i];
             all = 0;
+            str[i + 1] = table[code[i]];
             break;
           } else {
             code[i] = 0;
+            str[i + 1] = table[0];
           }
         }
         if (all) break;
-
       }
 
       printf("finished %i/%i\n", start + 1, tableLen);
