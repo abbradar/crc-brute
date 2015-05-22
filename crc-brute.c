@@ -40,12 +40,10 @@ int main() {
     }
   }
   
-  volatile int nothing = 1;
-  for (int len = from; nothing && len <= to; ++len) {
+  for (int len = from; len <= to; ++len) {
     printf("length: %i (trying from %i to %i)\n", len, from, to);
     #pragma omp parallel for
     for (int start = 0; start < tableLen; ++start) {
-      if (!nothing) continue;
       printf("running %i/%i\n", start + 1, tableLen);
 
       // code is used from second character onwards
@@ -78,7 +76,7 @@ int main() {
             }
             printf("\n");
             printf("result (str): %s\n", str);
-            nothing = 0;
+            exit(0);
           }
         }
         
@@ -100,5 +98,5 @@ int main() {
       printf("finished %i/%i\n", start + 1, tableLen);
     }
   }
-  return nothing;
+  return 1;
 }
