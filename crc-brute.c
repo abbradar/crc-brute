@@ -9,6 +9,7 @@
 const int from = 29;
 const int to = 30;
 const char range[] = "\x21\x2f" "\x3a\x40" "\x5b\x60" "\x7b\x7e" "\x80\xff";
+const long long unsigned int reportEach = 1000000000;
 
 const uLong targetCrc = 0xfb610011;
 const unsigned char targetShaHex[] = "35bfe051be8b10feb2c92f4daed7d2f2e387bb68";
@@ -46,7 +47,15 @@ int main() {
       str[0] = table[start];
       str[len] = '\0';
 
+      long long unsigned int num = 0;
+
       while (1) {
+        ++num;
+        if (num == reportEach) {
+          printf("done %i hashes\n", num);
+          num = 0;
+        }
+
         for (int i = 1; i < len; ++i) {
           str[i] = table[code[i - 1]];
         }
@@ -77,6 +86,7 @@ int main() {
           }
         }
         if (all) break;
+
       }
 
       printf("finished %i/%i\n", start + 1, tableLen);
