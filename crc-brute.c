@@ -6,9 +6,17 @@
 #include <zlib.h>
 #include <openssl/sha.h>
 
+/* known things:
+crc32 hash, sha1 hash
+13 russian letters, 3 ascii symbols
+utf8 encoding
+*/
+
+// 13*2+3 = 29
 const int from = 29;
-const int to = 30;
-const char range[] = "\x21\x2f" "\x3a\x40" "\x5b\x60" "\x7b\x7e" "\x80\xff";
+const int to = 29;
+// see UTF-8 and ASCII character tables for explanation
+const char range[] = "\x21\x2f" "\x3a\x40" "\x5b\x60" "\x7b\x7e" "\xd0\xd1" "\x90\xbf" "\x80\x0f";
 const long long unsigned int reportEach = 1000000000;
 
 const uLong targetCrc = 0xfb610011;
