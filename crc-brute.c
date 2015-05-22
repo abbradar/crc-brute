@@ -75,6 +75,12 @@ int main() {
 
         uLong crc = crc32(initCrc, str, len);
         if (crc == targetCrc) {
+          printf("possible result (hex): ");
+          for (int i = 0; i < len; i++) {
+            printf("%02hhx ", str[i]);
+          }
+          printf("\n");
+
           unsigned char sha[SHA_DIGEST_LENGTH];
           SHA1(str, len, sha);
           if (memcmp(sha, targetSha, SHA_DIGEST_LENGTH) == 0) {
