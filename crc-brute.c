@@ -35,7 +35,7 @@ int main() {
   unsigned char table[256];
   int tableLen = 0;
   for (int i = 0; i < (sizeof(range) - 1) / 2; ++i) {
-    for (unsigned char c = range[i]; c <= range[i+1]; ++c) {
+    for (unsigned char c = range[i * 2]; c <= range[i * 2 + 1]; ++c) {
       table[tableLen] = c;
       assert(++tableLen <= 256);
     }
@@ -89,7 +89,7 @@ int main() {
         }
         
         int all = 1;
-        for (int i = len - 1; i >= 0; --i) {
+        for (int i = 0; i < len - 1; ++i) {
           if (code[i] != tableLen - 1) {
             ++code[i];
             all = 0;
