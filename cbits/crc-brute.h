@@ -1,3 +1,11 @@
 #include <stdint.h>
 
-int crcBruteUtf8_16(const int* assigns, const int length, const uint16_t** tables, const int* ranges, const uint32_t target, int *stop, int (*check)(), uint16_t* str);
+typedef struct utf8_c {
+  char c[4];
+} utf8_c;
+
+int crcBruteUtf8( const utf8_c** tables, const int* widths, const int length, const int* ranges
+                , const uint32_t target
+                , int (*periodic)(unsigned long long), int (*check)()
+                , utf8_c* str
+                );

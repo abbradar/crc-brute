@@ -16,24 +16,51 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
-executable crc-brute
-  main-is:             Main.hs
-  -- other-modules:       
-  -- other-extensions:    
+library
   build-depends:       base >=4.8 && <4.9
                      , vector
                      , bytestring
                      , text
                      , stm
                      , async-pool
-                     , cryptohash
-                     , base16-bytestring
   hs-source-dirs:      src
+  exposed-modules:     CRCBrute
+                       Utils
   default-extensions:  LambdaCase
                      , CApiFFI
-                     , OverloadedStrings
-  ghc-options:         -O2 -threaded -rtsopts
-  cc-options:          -std=gnu99 -O3 -march=native
+                     , MultiWayIf
+  ghc-options:         -Wall -O2
+  cc-options:          -Wall -O3 -march=native -std=gnu99
   include-dirs:        cbits
   c-sources:           cbits/crc-brute.c
+  pkgconfig-depends:   zlib
+  default-language:    Haskell2010
+
+executable secret-message
+  build-depends:       base >=4.8 && <4.9
+                     , crc-brute
+                     , bytestring
+                     , text
+                     , vector
+                     , base16-bytestring
+                     , cryptohash
+  default-extensions:  OverloadedStrings
+  ghc-options:         -Wall -O2 -threaded -rtsopts
+  hs-source-dirs:      exe
+  main-is:             Main.hs
+  default-language:    Haskell2010
+
+test-suite tests
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  build-depends:       base >=4.8 && <4.9
+                     , crc-brute
+                     , tasty
+                     , tasty-hunit
+                     , text
+                     , cryptohash
+                     , digest
+  hs-source-dirs:      exe
+  default-extensions:  ViewPatterns
+  ghc-options:         -Wall -O2 -threaded -rtsopts
   default-language:    Haskell2010
