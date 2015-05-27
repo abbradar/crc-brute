@@ -74,8 +74,9 @@ int crcBruteUtf8( const utf8_c** tables, const int* widths, const int length, co
   unsigned long long num = 0;
   target = ~target;
   while (1) {
-    if (++num % checkEach == 0) {
+    if (++num == checkEach) {
       if (!periodic(num)) return 0;
+      num = 0;
     }
 
     if (partialCrc[length] == target) {
