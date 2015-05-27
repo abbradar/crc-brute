@@ -45,6 +45,7 @@ instance Storable CUTF8Char where
 
 type Table = Ptr (Ptr CUTF8Char)
 
+foreign import capi "crc-brute.h makeCrcTable" c_makeCrcTable :: IO ()
 foreign import capi "crc-brute.h crcBruteUtf8" c_crcBruteUtf8 :: Table -> Ptr CInt -> CInt -> Ptr CInt
                                                                 -> Word32
                                                                 -> FunPtr Periodic -> FunPtr Check
@@ -65,6 +66,7 @@ mkTable table func = with [] table
 
 crcBruteUtf8 :: Bool -> [(Int, [Char])] -> Word32 -> (T.Text -> Bool) -> IO (Maybe T.Text)
 crcBruteUtf8 verbose table target check = mkTable (map snd table) $ \tablePtrs -> do
+  c_makeCrcTable
   threads <- getNumCapabilities
   withTaskGroup threads $ \tg -> do
     res <- newEmptyTMVarIO
@@ -102,12 +104,13 @@ crcBruteUtf8 verbose table target check = mkTable (map snd table) $ \tablePtrs -
                   when verbose $ do
                     new <- getCPUTime
                     old <- readIORef time
-                    let int = fromIntegral (new - old) / 1000000000 :: Double
+                    let int = fromIntegral (new - old) / 10^(12-3::Int) :: Double
                     when verbose $ putStrLn $ prefix ++ "done " ++ show n ++ " hashes in " ++ show int ++ " ms"
                     writeIORef time new
                   return True
 
               checkWrap = do
+                when verbose $ putStrLn $ prefix ++ "found possible solution"
                 ws <- T.pack <$> map unCUTF8Char <$> peekArray plen str
                 let ret = check ws
                 when ret $ do
@@ -123,9 +126,10 @@ crcBruteUtf8 verbose table target check = mkTable (map snd table) $ \tablePtrs -
             withPtr table' $ \table'' ->
             withPtr widths' $ \widths'' ->
             withPtr ranges' $ \ranges'' ->
-            bracket (mkPeriodic periodic) freeHaskellFunPtr $ \pcb ->
-            bracket (mkCheck checkWrap) freeHaskellFunPtr $ \ccb ->
-            c_crcBruteUtf8 table'' widths'' (fromIntegral plen) ranges'' target pcb ccb str
+            bracket (mkPeriodic periodic) freeHaskellFunPtr $ \periodic'' ->
+            bracket (mkCheck checkWrap) freeHaskellFunPtr $ \check'' ->
+            c_crcBruteUtf8 table'' widths'' (fromIntegral plen) ranges'' target periodic'' check'' str
+          when verbose $ putStrLn $ prefix ++ "finished"
 
     bracket (mapM (async tg . worker) workRanges) stopWorker $ \ws -> do
       atomically $ (Just <$> takeTMVar res) `orElse` (Nothing <$ mapM_ waitSTM ws)
